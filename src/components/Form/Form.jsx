@@ -1,18 +1,24 @@
-import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { BiMailSend } from "react-icons/bi";
 import { useAddCommentMutation } from "../../redux/commentApi";
 import styles from "./Form.module.css";
+
+import { Spinner } from "../Spinner/Spinner";
 
 export const Form = () => {
   const [addComment, { isLoading }] = useAddCommentMutation();
 
   const onHandleSubmit = (e) => {
     e.preventDefault();
-    Object.fromEntries(new FormData(e.target));
+
+    const data = Object.fromEntries(new FormData(e.target));
+    const dataValidate = Object.values(data).filter((element) => !!element);
+
+    if (dataValidate.length <= 1) {
+      return toast.error("Please write something!");
+    }
 
     try {
-      const data = Object.fromEntries(new FormData(e.target));
       addComment(data);
       toast.success("Your comment added");
       e.target.reset();
@@ -31,12 +37,18 @@ export const Form = () => {
 
         <label className={styles.label}>
           <span className={styles.labelName}>Your comment</span>
-          <textarea className={styles.input} name="content" rows="5" required />
+          <textarea className={styles.input} name="content" rows="5" />
         </label>
 
         <button className={styles.formBtn}>
-          <BiMailSend className={styles.icon} />
-          Send
+          {isLoading ? (
+            <Spinner size={"sm"} />
+          ) : (
+            <>
+              <BiMailSend className={styles.icon} />
+              Send
+            </>
+          )}
         </button>
       </form>
     </div>
