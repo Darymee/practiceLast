@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
-import { BiMailSend } from 'react-icons/bi';
-import styles from './Form.module.css';
+import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { BiMailSend } from "react-icons/bi";
+import { useAddCommentMutation } from "../../redux/commentApi";
+import styles from "./Form.module.css";
 
 export const Form = () => {
-  const [author, setAuthor] = useState('');
-  const [content, setContent] = useState('');
-
-  const onHandleChange = (e) => {
-    const { name, value } = e.target;
-    console.log(name, value);
-  };
+  const [addComment, { isLoading }] = useAddCommentMutation();
 
   const onHandleSubmit = (e) => {
     e.preventDefault();
+    Object.fromEntries(new FormData(e.target));
 
-    setAuthor('');
-    setContent('');
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      addComment(data);
+      toast.success("Your comment added");
+      e.target.reset();
+    } catch (error) {
+      toast.error("Your comment invalid");
+    }
   };
 
   return (
@@ -24,24 +26,12 @@ export const Form = () => {
       <form className={styles.form} onSubmit={onHandleSubmit}>
         <label className={styles.label}>
           <span className={styles.labelName}>Full name</span>
-          <input
-            type='text'
-            name='name'
-            className={styles.input}
-            value={author}
-            onChange={onHandleChange}
-          />
+          <input type="text" name="author" className={styles.input} required />
         </label>
 
         <label className={styles.label}>
           <span className={styles.labelName}>Your comment</span>
-          <textarea
-            className={styles.input}
-            name='text'
-            rows='5'
-            value={content}
-            onChange={onHandleChange}
-          ></textarea>
+          <textarea className={styles.input} name="content" rows="5" required />
         </label>
 
         <button className={styles.formBtn}>
